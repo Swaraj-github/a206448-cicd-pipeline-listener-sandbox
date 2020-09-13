@@ -23,7 +23,7 @@ Parameters:
 
   GitHubOAuthToken:
     Type: String
-    Default:  b7da512073a20820db448e935ce7b8c4eb722761
+    Default:  5e0f449a9fc60511efab295338456a1de176d261
     Description:  CodePipeline requires an OAuthToken
 
 Resources:
