@@ -14,133 +14,19 @@ Parameters:
   CodePipelineBucketPrefix:
     Description: CodePipeline needs a utility bucket for its internal use. Specify a unique prefix for the bucket name
     Type: String
-    Default: a206448-codepipeline-work-swaraj-
+    Default: a206448-codepipeline-swaraj-
 
   GitHubRepository:
     Type: String
-    Default: https://github.com/Swaraj-github/a206448-cicd-pipeline-listener-sandbox.git
+    Default: Swaraj-github/a206448-cicd-pipeline-listener-sandbox/master
     Description:  owner/repository/branch
 
   GitHubOAuthToken:
     Type: String
-    Default:  b4317bc6923f79c2ac2ec5a5e0bc103f10695ce0
+    Default:  b7da512073a20820db448e935ce7b8c4eb722761
     Description:  CodePipeline requires an OAuthToken
 
 Resources:
-
-  CodeBuildRole:
-    Type: "AWS::IAM::Role"
-    Properties:
-      RoleName:
-        'Fn::Join': [ "", ["CodeBuildRole", "-", !Ref 'AWS::StackName', "-", !Ref 'Environment']]
-      AssumeRolePolicyDocument:
-        Version: "2012-10-17"
-        Statement:
-          Effect: "Allow"
-          Principal:
-            Service: "codebuild.amazonaws.com"
-          Action: "sts:AssumeRole"
-
-  CodePipelineRole:
-    Type: "AWS::IAM::Role"
-    Properties:
-      RoleName:
-        'Fn::Join': [ "", ["CodePipelineRole", "-", !Ref 'AWS::StackName', "-", !Ref 'Environment']]
-      AssumeRolePolicyDocument:
-        Version: "2012-10-17"
-        Statement:
-          Effect: "Allow"
-          Principal:
-            Service: "codepipeline.amazonaws.com"
-          Action: "sts:AssumeRole"
-
-  # This can be restricted more
-  CodeBuildPolicy:
-    Type: "AWS::IAM::Policy"
-    Properties:
-      PolicyName:
-        'Fn::Join': [ "", ["CodeBuildPolicy", "-", !Ref 'AWS::StackName', "-", !Ref 'Environment']]
-      PolicyDocument:
-        Version: "2012-10-17"
-        Statement:
-          Effect: Allow
-          Action:
-            - logs:CreateLogGroup
-            - logs:CreateLogStream
-            - logs:PutLogEvents
-            - logs:DescribeLogGroups
-            - logs:FilterLogEvents
-            - logs:DescribeLogStreams
-            - logs:DeleteLogGroup
-            - s3:putObject
-            - s3:getObject
-            - codebuild:*
-            - 'cloudformation:List*'
-            - 'cloudformation:Get*'
-            - 'cloudformation:PreviewStackUpdate'
-            - 'cloudformation:ValidateTemplate'
-            - 'cloudformation:CreateStack'
-            - 'cloudformation:CreateUploadBucket'
-            - 'cloudformation:DeleteStack'
-            - 'cloudformation:Describe*'
-            - 'cloudformation:UpdateStack'
-            - 'lambda:Get*'
-            - 'lambda:List*'
-            - 'lambda:CreateFunction'
-            - 'lambda:AddPermission'
-            - 'lambda:CreateAlias'
-            - 'lambda:DeleteFunction'
-            - 'lambda:InvokeFunction'
-            - 'lambda:PublishVersion'
-            - 'lambda:RemovePermission'
-            - 'lambda:Update*'
-            - 'apigateway:GET'
-            - 'apigateway:POST'
-            - 'apigateway:PUT'
-            - 'apigateway:DELETE'
-            - 's3:CreateBucket'
-            - 's3:DeleteBucket'
-            - 's3:ListBucket'
-            - 's3:ListBucketVersions'
-            - 's3:PutObject'
-            - 's3:GetObject'
-            - 's3:DeleteObject'
-            - 'iam:PassRole'
-            - 'kinesis:*'
-            - 'iam:GetRole'
-            - 'iam:CreateRole'
-            - 'iam:PutRolePolicy'
-            - 'iam:DeleteRolePolicy'
-            - 'iam:DeleteRole'
-            - 'cloudwatch:GetMetricStatistics'
-            - 'events:Put*'
-            - 'events:Remove*'
-            - 'events:Delete*'
-            - 'dynamodb:*'
-          Resource: "*"
-      Roles:
-        -  !Ref CodeBuildRole
-
-  CodePipelinePolicy:
-    Type: "AWS::IAM::Policy"
-    Properties:
-      PolicyName:
-        'Fn::Join': [ "", ["CodePipelinePolicy", "-", !Ref 'AWS::StackName', "-", !Ref 'Environment']]
-      PolicyDocument:
-        Version: "2012-10-17"
-        Statement:
-          Effect: Allow
-          Action:
-            - logs:CreateLogGroup
-            - logs:CreateLogStream
-            - logs:PutLogEvents
-            - s3:putObject
-            - s3:getObject
-            - codebuild:*
-          Resource:
-            - "*"
-      Roles:
-        -  !Ref CodePipelineRole
 
   S3:
     Type: "AWS::S3::Bucket"
@@ -152,7 +38,7 @@ Resources:
     Properties:
       Name: Test-Build
       Description: Demo of CodeBuild with CodeDeploy pipeline.
-      ServiceRole: !Ref CodeBuildRole
+      ServiceRole: arn:aws:iam::962390577453:role/a206448-CodeBuildRole
       TimeoutInMinutes: 5
       Source:
         Type: CODEPIPELINE
@@ -169,7 +55,7 @@ Resources:
     Properties:
       Name: Build-Deploy
       Description: Demo of CodeBuild with CodeDeploy pipeline.
-      ServiceRole: !Ref CodeBuildRole
+      ServiceRole: arn:aws:iam::962390577453:role/a206448-CodeBuildRole
       TimeoutInMinutes: 5
       Source:
         Type: CODEPIPELINE
@@ -199,7 +85,7 @@ Resources:
         Location: !Ref S3
         Type: S3
       RestartExecutionOnUpdate: true
-      RoleArn: !Join [ "", ["arn:aws:iam::", !Ref "AWS::AccountId", ":role/", !Ref CodePipelineRole  ] ]
+      RoleArn: arn:aws:iam::962390577453:role/service-role/a206448-ecpdevops-amsnovus-deploy
       Stages:
 
         # Stage 1:  Get the source from GitHub:
@@ -262,13 +148,9 @@ Outputs:
     Value: !Ref Environment
   Github:
     Value: !Ref GitHubRepository
-  CodeBuildRole:
-    Value: !Ref CodeBuildRole
-  CodeBuildPolicy:
-    Value: !Ref CodeBuildPolicy
-  CodePipelineRole:
-    Value: !Ref CodePipelineRole
-  CodePipelinePolicy:
-    Value: !Ref CodePipelinePolicy
+
+
+
+
   S3:
     Value: !Ref S3
